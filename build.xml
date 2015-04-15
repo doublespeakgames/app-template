@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<project name="PROJECT_NAME">
+
+	<!-- properties -->
+	<property name="r.js" value="tools/r.js" />
+	<property name="closure.jar" value="tools/compiler.jar" />
+	<property name="rhino.jar" value="tools/js.jar" />
+	<property name="build.js" value="tools/build.js" />
+	<property name="build.dir" value="build" />
+	<property name="deploy.path" value="./deploy" />
+
+	<target name="all" depends="build,deploy" />
+	
+	<target name="clean">
+		<delete dir="${build.dir}" />
+	</target>
+
+	<target name="build" depends="clean">
+		<java classname="org.mozilla.javascript.tools.shell.Main">
+			<classpath>
+				<pathelement location="${rhino.jar}" />
+				<pathelement location="${closure.jar}" />
+			</classpath>
+			<arg value="${r.js}" />
+			<arg value="-o" />
+			<arg value="${build.js}" />
+		</java>
+	</target>
+	
+	<target name="deploy">
+		<delete includeemptydirs="true">
+			<fileset dir="${deploy.path}" includes="**/*" />
+		</delete>
+		<copy todir="${deploy.path}">
+			<fileset dir="${build.dir}">
+				<include name="**/*.*" />
+				<exclude name="**/thumbs.db" />
+				<exclude name="img/src/*.*" />
+				<exclude name="img/nodeploy/*.*" />
+			</fileset>
+		</copy>
+		<replaceregexp 	file="${deploy.path}/index.html" 
+						match="&lt;div [^>]*nodeploy>[^&lt;]*&lt;/div>" 
+						replace="" byline="true" 
+		/>
+	</target>
+</project>
